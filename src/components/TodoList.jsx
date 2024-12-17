@@ -23,7 +23,7 @@ const Title = styled.h1`
 const InputContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -56,11 +56,15 @@ const Button = styled.button`
   }
 `;
 
+const ErrorText = styled.p`
+  color: red;
+  font-size: 14px;
+  margin: 5px 0 15px;
+`;
+
 const ClearButton = styled(Button)`
   background-color: #f44336;
   margin-top: 10px;
-  width: 100%;
-  
 
   &:hover {
     background-color: #d32f2f;
@@ -80,7 +84,6 @@ const Task = styled.li`
   border-bottom: 1px solid #ccc;
 
   button {
-    max-width: 100%;
     background-color: #f44336;
     border: none;
     color: white;
@@ -91,31 +94,41 @@ const Task = styled.li`
 `;
 
 const TodoList = () => {
-  const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState('');
+  const [tasks, setTasks] = useState([]); // Lista de tareas
+  const [newTask, setNewTask] = useState(''); // Nueva tarea
+  const [error, setError] = useState(''); // Mensaje de error
 
   // Función para agregar tarea
   const addTask = () => {
-    if (newTask.trim() !== '') {
-      setTasks([...tasks, newTask]);
-      setNewTask('');
+    if (newTask.trim() === '') {
+      setError('La tarea no puede estar vacía.');
+      return;
     }
+
+    if (tasks.includes(newTask.trim())) {
+      setError('Esta tarea ya existe en la lista.');
+      return;
+    }
+
+    setTasks([...tasks, newTask.trim()]);
+    setNewTask(''); // Limpiar el input
+    setError(''); // Limpiar el mensaje de error
   };
 
-  // Función para eliminar tarea individual
+  // Función para eliminar una tarea individual
   const removeTask = (index) => {
     const updatedTasks = tasks.filter((_, i) => i !== index);
     setTasks(updatedTasks);
   };
 
-  // Función para eliminar todas las tareas
+  // Función para borrar todas las tareas
   const clearAllTasks = () => {
-    setTasks([]); 
+    setTasks([]);
   };
 
   return (
     <Container>
-      <Title>Nuctasks</Title>
+      <Title>To-Do List</Title>
       <InputContainer>
         <Input
           type="text"
@@ -125,6 +138,7 @@ const TodoList = () => {
         />
         <Button onClick={addTask}>Agregar</Button>
       </InputContainer>
+      {error && <ErrorText>{error}</ErrorText>} {/* Mostrar mensaje de error */}
       <TaskList>
         {tasks.map((task, index) => (
           <Task key={index}>
@@ -133,7 +147,9 @@ const TodoList = () => {
           </Task>
         ))}
       </TaskList>
-      {tasks.length > 1 && <ClearButton onClick={clearAllTasks}>Borrar todas las tareas</ClearButton>}
+      {tasks.length > 0 && (
+        <ClearButton onClick={clearAllTasks}>Borrar todas las tareas</ClearButton>
+      )}
     </Container>
   );
 };
